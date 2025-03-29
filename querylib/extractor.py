@@ -57,44 +57,39 @@ class DocstringExtractor:
 
     def _get_clean_module_path(self, obj, parent_module=None):
         """
-        Generate a clean, accurate module path for an object.
+        Generate an importable module path for a given object.
 
         Args:
-            obj: The object to get the path for
-            parent_module: Optional parent module context
+            obj: The object to get the path for.
+            parent_module: Optional parent module.
 
         Returns:
-            str: Cleaned module path
+            str: Importable module path.
         """
         try:
-            # Try to get the module name
-            if hasattr(obj, "__module__"):
-                module_name = obj.__module__
-            elif parent_module:
-                module_name = parent_module.__name__
-            else:
+            # Get the actual module
+            module = inspect.getmodule(obj) or self.module
+            module_name = module.__name__ if module else self.module_name
+
+            # Ensure module belongs to target package
+            if not module_name.startswith(self.module_name):
                 module_name = self.module_name
 
-            # Remove redundant or incorrect prefixes
-            if module_name.startswith("__"):
-                module_name = self.module_name
+            # Get qualified name (handles nested classes/methods)
+            qualified_name = getattr(obj, "__qualname__", getattr(obj, "__name__", ""))
 
-            # Get the object's name
-            obj_name = obj.__name__ if hasattr(obj, "__name__") else ""
+            # Try resolving the correct parent path
+            parts = module_name.split(".")
+            for i in range(len(parts), 0, -1):
+                candidate_module = ".".join(parts[:i])
+                try:
+                    imported_mod = importlib.import_module(candidate_module)
+                    if hasattr(imported_mod, qualified_name.split(".")[0]):
+                        return f"{candidate_module}.{qualified_name}"
+                except ImportError:
+                    continue  # Try a higher-level module
 
-            # Construct clean path
-            if inspect.isclass(obj):
-                return f"{module_name}.{obj_name}"
-            elif inspect.isfunction(obj):
-                # For methods, include the class name
-                if hasattr(obj, "__qualname__"):
-                    parts = obj.__qualname__.split(".")
-                    if len(parts) > 1:
-                        return f"{module_name}.{parts[-2]}.{parts[-1]}"
-                return f"{module_name}.{obj_name}"
-
-            return module_name
-
+            return f"{module_name}.{qualified_name}"  # Fallback
         except Exception as e:
             print(f"Error generating path for {obj}: {e}")
             return self.module_name

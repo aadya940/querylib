@@ -1,2 +1,1 @@
-from .extractor import DocstringExtractor
-from .rag import DocumentationRAG
+"""Init for module paths."""
