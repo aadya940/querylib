@@ -1,7 +1,12 @@
-from querylib import DocumentationRAG
-import pprint
+from querylib.extractor import DocstringExtractor
+from querylib.rag import DocumentationRAG
 
-r = DocumentationRAG("sklearn.json", similarity_top_k=8)
-res = r.ask_query("How to perform Simple Linear Regression using sklearn?")
-for i in res["results"]:
-    pprint.pprint(i)
+# Extractor
+extractor = DocstringExtractor("numpy")
+docs = extractor.extract_docs()
+extractor.save_to_json(docs, "numpy.json")
+
+# RAG
+rag_system = DocumentationRAG("numpy.json")
+response = rag_system.ask_query("How to add to vectors together using Numpy?")
+print(response)
