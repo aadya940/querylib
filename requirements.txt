@@ -1,0 +1,6 @@
+llama-index
+faiss-cpu
+llama-index-vector-stores-faiss
+orjson
+numpy
+docstring-parser
