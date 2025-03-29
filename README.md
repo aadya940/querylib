@@ -12,7 +12,10 @@ QueryLib is a Python library designed for extracting documentation from Python p
 To install the required dependencies, you can use pip:
 
 ```bash
+git clone ...
+cd querylib/
 pip install -r requirements.txt
+pip install .
 ```
 
 ## Usage
