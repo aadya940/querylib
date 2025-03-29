@@ -8,5 +8,5 @@ extractor.save_to_json(docs, "numpy.json")
 
 # RAG
 rag_system = DocumentationRAG("numpy.json")
-response = rag_system.ask_query("How to add to vectors together using Numpy?")
+response = rag_system.ask_query("How to add two vectors together using Numpy?")
 print(response)
